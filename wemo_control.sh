@@ -37,22 +37,37 @@ fi
 function scan(){
 HOMENET=192.168.0
 
+# i expect to find at least 5 devices within the first 15 ips
+# because i set them to have static ips from 246-250
+# if i dont find all of them keep trying until you do
+
+EXPECTED=5
 found=0
 echo "scanning..."
-for((oct=0; oct<256; oct++)); 
-  do 
-  IP="${HOMENET}.${oct}"
-  echo -en "$IP            \r"; 
-  PORT=""
-  setPort
-  if [[ "${PORT}" != "" ]]
-  then
-    found=1
-    name=$(getFriendlyName)
-    state=$(getState)
-    msg=$(printf "found [%-12s] at [%-12s] with state=[%s]" "${name}" "${IP}" "${state}")
-    echo "$msg"
-  fi
+total=0
+while [[ $total < $EXPECTED ]]
+do
+	for((oct=256; oct>240; oct--)); 
+	#for((oct=0; oct<256; oct++)); 
+	  do 
+	  IP="${HOMENET}.${oct}"
+	  echo -en "$IP            \r"; 
+	  PORT=""
+	  setPort
+	  if [[ "${PORT}" != "" ]]
+	  then
+		found=1
+		total=$(($total+1))
+		name=$(getFriendlyName)
+		state=$(getState)
+		msg=$(printf "found [%-12s] at [%-12s] with state=[%s]" "${name}" "${IP}" "${state}")
+		echo "$msg"
+	  fi
+	done
+	if [[ $total < $EXPECTED ]]
+	then
+	  echo $(printf "found %d but expected to find %d. re-scanning" $total $EXPECTED)
+	fi
 done
 if [[ $found == 0 ]]
 then
