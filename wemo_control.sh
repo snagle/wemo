@@ -8,7 +8,14 @@
 #
 #
 CURL_MAX_WAIT=0.035
-# set -x
+MAX_CHECK=25
+#set -x
+
+
+function portTest(){
+  port=$1
+  PORTTEST=$(curl -s -m ${CURL_MAX_WAIT} $IP:$port/setup.xml | grep -i "belkin")
+}
 
 function setPort(){
 
@@ -19,49 +26,49 @@ fi
 
 if [[ $IP != "" ]]
 then
-  PORTTEST=$(curl -s -m ${CURL_MAX_WAIT} $IP:49153 | grep "404")
-
-  if [[ "$PORTTEST" != "" ]]
-	then
-	PORT=49153
-  else
-    PORTTEST=$(curl -s -m ${CURL_MAX_WAIT} $IP:49152 | grep "404")
+  for check in 49154 49153 49152
+  do
+    portTest $check
     if [[ "$PORTTEST" != "" ]]
-	then
-	  PORT=49152
-	fi
-  fi
+	  then
+	    PORT=$check
+      break
+    else
+      PORT=""
+    fi
+  done
 fi
 }
 
 function scan(){
-HOMENET=192.168.0
+HOMENET=192.168.1
 
 # i expect to find at least 5 devices within the first 15 ips
 # because i set them to have static ips from 246-250
 # if i dont find all of them keep trying until you do
 
-EXPECTED=5
+EXPECTED=6
 found=0
-echo "scanning..."
 total=0
+echo "scanning..."
 while [[ $total < $EXPECTED ]]
 do
-	for((oct=256; oct>240; oct--)); 
-	#for((oct=0; oct<256; oct++)); 
+total=0
+	#for((oct=256; oct>240; oct--)); 
+	for((oct=0; oct<$MAX_CHECK; oct++)); 
 	  do 
 	  IP="${HOMENET}.${oct}"
-	  echo -en "$IP            \r"; 
+	  echo -en "$IP                                \r"; 
 	  PORT=""
 	  setPort
 	  if [[ "${PORT}" != "" ]]
 	  then
-		found=1
-		total=$(($total+1))
-		name=$(getFriendlyName)
-		state=$(getState)
-		msg=$(printf "found [%-12s] at [%-12s] with state=[%s]" "${name}" "${IP}" "${state}")
-		echo "$msg"
+		  found=1
+		  total=$(($total+1))
+		  name=$(getFriendlyName)
+		  state=$(getState)
+		  msg=$(printf "found [%-12s] at [%-12s] [%s] with state=[%s]\n" "${name}" "${IP}" "${PORT}" "${state}")
+		  echo "$msg"
 	  fi
 	done
 	if [[ $total < $EXPECTED ]]
@@ -72,6 +79,8 @@ done
 if [[ $found == 0 ]]
 then
   echo "no wemos found :("
+else
+  echo -en "               \r"
 fi
 
 }
