@@ -8,7 +8,9 @@
 #
 #
 CURL_MAX_WAIT=0.035
-MAX_CHECK=25
+MAX_CHECK=35
+EXPECTED=6
+
 #set -x
 
 
@@ -47,7 +49,6 @@ HOMENET=192.168.1
 # because i set them to have static ips from 246-250
 # if i dont find all of them keep trying until you do
 
-EXPECTED=6
 found=0
 total=0
 echo "scanning..."
