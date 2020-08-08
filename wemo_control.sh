@@ -107,7 +107,7 @@ function flip(){
 
   if [[ "$search" == "" ]]
   then
-    echo "no results for wemo named $name"
+    echo "no results for wemo named $input"
   fi
 }
 
