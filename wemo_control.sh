@@ -53,6 +53,10 @@ done
 echo -en "                            \r"
 # we have the ips and ports in the tmp file
 
+}
+
+function report(){
+
 while read line
 do
   name=$(getFriendlyName "$line")
@@ -83,6 +87,28 @@ then
 else
   echo "failed to get current state"
 fi
+}
+
+function flip(){
+  input=$1
+  scan
+
+  while read line
+  do
+    name=$(getFriendlyName "$line")
+    search=$(echo "$name" | grep $input)
+    if [[ "$search" != "" ]]
+    then
+      echo "toggling $line"
+      toggle "$line"
+      break
+    fi
+  done < $tmp
+
+  if [[ "$search" == "" ]]
+  then
+    echo "no results for wemo named $name"
+  fi
 }
 
 function getState(){
@@ -142,8 +168,14 @@ case $1 in
         "toggle")
         		toggle "$IP_PORT"
         		;;
+        "flip")
+            # toggle by name
+            name="$IP_PORT"
+            flip "$name"
+            ;;
         "scan")
         		scan
+            report
         		;;
         *)
             echo $(printf "unknown command: %s" $1)
