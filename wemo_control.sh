@@ -99,7 +99,7 @@ function flip(){
     search=$(echo "$name" | grep $input)
     if [[ "$search" != "" ]]
     then
-      echo "toggling $line"
+      echo "toggling $name at $line"
       toggle "$line"
       break
     fi
