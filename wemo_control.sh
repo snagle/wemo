@@ -21,7 +21,6 @@ DHCP_POOL_BASE=100
 
 # set -x
 
-
 function portTest(){
   port=$1
   addr=$2
@@ -35,31 +34,34 @@ function portTest(){
 
 
 function scan(){
-total=$(wc -l $tmp)
+total=$(wc -l $tmp | awk '{print $1}')
 
+sent=0
 while [[ $total < $EXPECTED ]]
 do
   :> $tmp
-  echo -en "$total working....                            \r"
   for((oct=0; oct<$MAX_CHECK; oct++)); 
   do
     for port in ${ports[@]}
     do
+      sent=$(($sent+1))
+      total=$(wc -l $tmp | awk '{print $1}')
+      printf "requests sent: %5d found: %3d expected: %d                   \r" $sent $total $EXPECTED
       IP=$(printf "%s.%s" $HOMENET $(($DHCP_POOL_BASE + $oct)))
       # IP="${HOMENET}.${oct}"
       portTest $port $IP &
     done
   done
   wait
-  total=$(wc -l $tmp)
 done
-echo -en "                            \r"
+printf "requests sent: %5d found: %3d expected: %d\n" $sent $total $EXPECTED
+# echo -en "                                                                  \r"
 # we have the ips and ports in the tmp file
 
 }
 
 function report(){
-
+echo "reporting, please stand by...."
 while read line
 do
   name=$(getFriendlyName "$line")
@@ -148,7 +150,7 @@ IP_PORT=$2
 
 if [ "$1" = "" ]
 	then
-		echo "Usage: ./wemo_control toggle|state|signal|name|scan 'IP_ADDRESS:PORT'"
+		echo "Usage: ./wemo_control toggle|flip|scan|on|off|state|signal|name 'IP_ADDRESS:PORT'"
 		exit
 fi
 
