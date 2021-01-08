@@ -14,16 +14,18 @@ touch $tmp
 CURL_MAX_WAIT=0.035
 MAX_CHECK=35
 EXPECTED=6
-HOMENET=192.168.1
+HOMENET=192.168.0
 ports=(49154 49153 49152)
+# tplink dhcp pool starts at 100
+DHCP_POOL_BASE=100
 
-#set -x
+# set -x
 
 
 function portTest(){
   port=$1
   addr=$2
-  #printf "testing %s:%d\n" $addr $port
+  # printf "testing %s:%d\n" $addr $port
   PORTTEST=$(curl -s -m ${CURL_MAX_WAIT} $addr:$port/setup.xml | grep -i "belkin")
   if [[ "$PORTTEST" != "" ]];
     then 
@@ -43,7 +45,8 @@ do
   do
     for port in ${ports[@]}
     do
-      IP="${HOMENET}.${oct}"
+      IP=$(printf "%s.%s" $HOMENET $(($DHCP_POOL_BASE + $oct)))
+      # IP="${HOMENET}.${oct}"
       portTest $port $IP &
     done
   done
