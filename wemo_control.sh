@@ -150,7 +150,8 @@ IP_PORT=$2
 
 if [ "$1" = "" ]
 	then
-		echo "Usage: ./wemo_control toggle|flip|scan|on|off|state|signal|name 'IP_ADDRESS:PORT'"
+		echo "Usage: ./wemo_control toggle|scan|on|off|state|signal|name 'IP_ADDRESS:PORT'"
+    echo "Usage: ./wemo_control flip friendly_name"
 		exit
 fi
 
